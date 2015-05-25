@@ -9,9 +9,13 @@ Check the license metadata of a package and its dependencies.
 
 <!-- js
   // The examples below are run as tests.
-  var checkNpmPackageLicenses = require('./');
+  var check = require('./');
 -->
 
 ```js
-typeof checkNpmPackageLicenses; // => 'function'
+check('mocha', '2.2.5', function(error, problems) {
+  problems.some(function(problem) {
+    return problem.message === 'Package commander@2.3.0 has no license metadata.';
+  }); // => true
+});
 ```
