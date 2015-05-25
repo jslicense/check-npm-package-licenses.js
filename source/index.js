@@ -37,40 +37,50 @@ module.exports = function(package, version, callback) {
           glob('node_modules/**/package.json', function(error, files) {
             async.reduce(files, [], function(memo, file, callback) {
               fs.readFile(file, function(error, buffer) {
-                var json = JSON.parse(buffer);
-                var name = json.name;
-                var license = json.license;
-                var version = json.version;
-                if (!license) {
-                  if (json.licenses) {
-                    callback(null, memo.concat({
-                      name: name,
-                      version: json.version,
-                      message: 'Package ' + name + '@' + version +
-                        ' has deprecated license metadata.'
-                    }));
+                try {
+                  var json = JSON.parse(buffer);
+                  var name = json.name;
+                  var license = json.license;
+                  var version = json.version;
+                  if (!license) {
+                    if (json.licenses) {
+                      callback(null, memo.concat({
+                        name: name,
+                        version: json.version,
+                        message: 'Package ' + name + '@' + version +
+                          ' has deprecated license metadata.'
+                      }));
+                    } else {
+                      callback(null, memo.concat({
+                        name: name,
+                        version: version,
+                        message: 'Package ' + name + '@' + version +
+                          ' has no license metadata.'
+                      }));
+                    }
+                  } else if (
+                    typeof license === 'string' &&
+                    spdx.valid(license)
+                  ) {
+                    callback(null, memo);
                   } else {
                     callback(null, memo.concat({
-                      name: name,
+                      name: json.name,
                       version: json.version,
+                      license: license,
+                      licenses: json.licenses,
                       message: 'Package ' + name + '@' + version +
-                        ' has no license metadata.'
+                        ' has invalid license metadata ' +
+                        JSON.stringify(license) + '.'
                     }));
                   }
-                } else if (
-                  typeof license === 'string' &&
-                  spdx.valid(license)
-                ) {
-                  callback(null, memo);
-                } else {
+                } catch (e) {
                   callback(null, memo.concat({
-                    name: json.name,
-                    version: json.version,
-                    license: license,
-                    licenses: json.licenses,
-                    message: 'Package ' + name + '@' + version +
-                      ' has invalid license metadata ' +
-                      JSON.stringify(license) + '.'
+                    name: name,
+                    version: version,
+                    message: 'Error processing ' +
+                      name + '@' + version +
+                      ' metadata.'
                   }));
                 }
               });
