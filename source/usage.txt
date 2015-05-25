@@ -1,0 +1,5 @@
+Check the license metadata of a package and its dependencies.
+
+Usage:
+  check-npm-package-licenses --help | -h
+  check-npm-package-licenses --version | -v
