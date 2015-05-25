@@ -19,3 +19,5 @@ check('mocha', '2.2.5', function(error, problems) {
   }); // => true
 });
 ```
+
+You can do the same from the command line with `check-npm-package-licenses mocha 2.2.5`.
